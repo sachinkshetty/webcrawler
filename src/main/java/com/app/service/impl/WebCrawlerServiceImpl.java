@@ -23,6 +23,15 @@ public class WebCrawlerServiceImpl implements WebCrawlerService {
 	@Value("${crawler.url}")
 	private String url;
 	
+	@Value("${css.firstelement}")
+	private String firstelement;
+	
+	@Value("${css.price}")
+	private String price;
+	
+	@Value("${css.productDescription}")
+	private String productDescription;
+	
 	@Resource
 	private HTMLParserService htmlParserService;
 	
@@ -35,7 +44,7 @@ public class WebCrawlerServiceImpl implements WebCrawlerService {
 	public JsonObject crawl() {
 		double sum=0;
 		JsonArray jsonArray = new JsonArray();
-		Element firstElement = processHtml(url,"ul.productLister").first();		
+		Element firstElement = processHtml(url,firstelement).first();		
 		Elements liElements = firstElement.children();
 		
 		for (Element lielement:liElements) {
@@ -45,12 +54,12 @@ public class WebCrawlerServiceImpl implements WebCrawlerService {
 			String pdpLink = aElement.attr("href");		
 			jsonObject.addProperty("title", title);
 			
-			String unitPrice = matchNumbers(lielement.select("p.pricePerUnit").first().text());
+			String unitPrice = matchNumbers(lielement.select(price).first().text());
 			sum = Double.parseDouble(unitPrice);
 			total = total+sum;			
 			jsonObject.addProperty("unit_price", unitPrice);
 			
-			Elements productDetailsElements = processHtml(pdpLink,"h3.productDataItemHeader");					
+			Elements productDetailsElements = processHtml(pdpLink,productDescription);					
 			jsonObject = getPDPDetails(productDetailsElements,jsonObject);			
 			jsonArray.add(jsonObject);		
 		}
